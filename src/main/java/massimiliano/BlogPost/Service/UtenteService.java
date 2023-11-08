@@ -1,29 +1,39 @@
-package Posting.Blogpost.Service;
+package massimiliano.BlogPost.Service;
 
-import Posting.Blogpost.Entities.Utente;
-import Posting.Blogpost.Exception.NotFoundExceptionUtente;
+import massimiliano.BlogPost.Entities.Utente;
+import massimiliano.BlogPost.Exception.BadRequestException;
+import massimiliano.BlogPost.Exception.NotFoundExceptionUtente;
+import massimiliano.BlogPost.Repository.UtenteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ListIterator;
-import java.util.Random;
 
 @Service
 public class UtenteService {
-    private List<Utente> utente = new ArrayList<>();
+    @Autowired
+    private UtenteRepository utenteRepository;
 
     public Utente save(Utente body) {
-        Random rdm = new Random();
-        body.setId(rdm.nextInt(1, 1000));
-        body.setAvatar("https://ui-avatars.com/api/?name=" + body.getName() + "+" + body.getSurname());
-        this.utente.add(body);
-        return body;
+
+
+        utenteRepository.findByEmail(body.getEmail()).ifPresent(user -> {
+            throw new BadRequestException("L'email " + user.getEmail() + " è già utilizzata!");
+        });
+
+        body.setAvatar("http://ui-avatars.com/api/?name=" + body.getName() + "+" + body.getSurname());
+
+        return utenteRepository.save(body);
     }
 
-    public List<Utente> getUtente() {
+    public Page<Utente> getUtente(int page, int size, String orderBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(orderBy));
 
-        return this.utente;
+        return utenteRepository.findAll(pageable);
     }
 
     public Utente findById(int id) {

@@ -1,12 +1,12 @@
-package Posting.Blogpost.Controller;
+package massimiliano.BlogPost.Controller;
 
-import Posting.Blogpost.Entities.Utente;
-import Posting.Blogpost.Service.UtenteService;
+import massimiliano.BlogPost.Entities.Utente;
+import massimiliano.BlogPost.Service.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/utenti")
@@ -15,9 +15,11 @@ public class UtenteController {
     private UtenteService utenteService;
 
     @GetMapping("")
-    public List<Utente> getUtente() {
+    public Page<Utente> getUtente(@RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "10") int size,
+                                  @RequestParam(defaultValue = "id") String orderBy) {
 
-        return utenteService.getUtente();
+        return utenteService.getUtente(page, size, orderBy);
     }
 
     @PostMapping("")
@@ -26,7 +28,7 @@ public class UtenteController {
         return utenteService.save(body);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}")
     public Utente findById(@PathVariable int id) {
 
         return utenteService.findById(id);
